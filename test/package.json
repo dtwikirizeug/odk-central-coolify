@@ -10,7 +10,7 @@
     "test": "npm run lint && npm run test:github-actions && npm run test:nginx && npm run test:service"
   },
   "dependencies": {
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.60.0",
     "chai": "^5.3.3",
     "deep-equal-in-any-order": "^2.2.0",
     "eslint": "^9.28.0",
