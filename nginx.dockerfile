@@ -12,18 +12,22 @@ RUN apt-get update \
 
 COPY ./ ./
 
-RUN files/prebuild/write-version.sh
+# Try to write the normal ODK version file.
+# If Coolify's build checkout does not contain enough Git metadata,
+# create a safe fallback version file so the build can continue.
+RUN files/prebuild/write-version.sh || printf "versions:\n 0000000000000000000000000000000000000000 central (v2026.2.0)\n 0000000000000000000000000000000000000000 client (v2026.2.0)\n 0000000000000000000000000000000000000000 server (v2026.2.0)\n" > /tmp/version.txt
+
 RUN files/prebuild/build-frontend.sh
-
-
 
 # When upgrading:
 #
-# 1. Use full-length tag, including nginx version.  See:
+# 1. Use full-length tag, including nginx version.
+#    See:
 #    * https://github.com/JonasAlfredsson/docker-nginx-certbot/blob/master/docs/dockerhub_tags.md
 #    * https://hub.docker.com/r/jonasal/nginx-certbot/tags
 # 2. Look for upstream changes to redirector.conf
 # 3. Confirm setup-odk.sh strips out HTTP-01 ACME challenge location.
+
 FROM jonasal/nginx-certbot:6.2.0-nginx1.31.2
 
 EXPOSE 80
@@ -43,6 +47,7 @@ COPY files/nginx/setup-odk.sh \
 COPY files/nginx/redirector.conf /usr/share/odk/nginx/
 COPY files/nginx/common-headers.conf /usr/share/odk/nginx/
 COPY files/nginx/robots.txt /usr/share/nginx/html
+
 COPY --from=intermediate dist/ /usr/share/nginx/html
 COPY --from=intermediate /tmp/version.txt /usr/share/nginx/html
 
